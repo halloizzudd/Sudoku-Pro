@@ -6,9 +6,9 @@ import '../../models/player_stats.dart';
 import '../../services/local_storage_service.dart';
 import 'game_completed_modal.dart';
 import 'game_over_modal.dart';
-import 'components/SudokuGrid.dart';
-import 'components/NumberPad.dart';
-import 'components/ActionBar.dart';
+import 'components/sudoku_grid.dart';
+import 'components/number_pad.dart';
+import 'components/action_bar.dart';
 
 class GameScreen extends StatefulWidget {
   const GameScreen({super.key});
