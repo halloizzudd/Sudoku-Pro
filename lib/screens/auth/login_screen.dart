@@ -1,4 +1,11 @@
 import 'package:flutter/material.dart';
+import '../../models/user_profile.dart';
+import '../../services/local_storage_service.dart';
+import '../../services/settings_service.dart';
+import '../root_shell.dart';
+import 'register_screen.dart';
+import 'forgot_password_screen.dart';
+import 'linking_dialog.dart';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
@@ -30,14 +37,10 @@ class _LoginScreenState extends State<LoginScreen> {
         // TODO: Implementasi autentikasi API sebenarnya di sini
         // bool isSuccess = await authService.login(...);
 
-        // Simulasi sukses
-        if (mounted) {
-          // Navigasi ke Home (Step 10)
-          // Navigator.pushReplacementNamed(context, '/home');
-          ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(content: Text('Login berhasil!')),
-          );
-        }
+        // Simulasi sukses → simpan token + profil, masuk Home (Step 9-10).
+        final email = _emailController.text.trim();
+        final username = email.contains('@') ? email.split('@').first : email;
+        await _completeAuth(username: username, email: email);
       } catch (e) {
         // Simulasi A3 - Network Error
         if (mounted) {
@@ -53,6 +56,39 @@ class _LoginScreenState extends State<LoginScreen> {
         }
       }
     }
+  }
+
+  // UC-04: SSO dummy — tampilkan "Linking account..." lalu login lokal.
+  Future<void> _handleSso(String provider) async {
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (_) => const LinkingDialog(),
+    );
+    await Future.delayed(const Duration(milliseconds: 1500));
+    if (!mounted) return;
+    Navigator.of(context).pop(); // tutup dialog linking
+    await _completeAuth(
+      username: '$provider Player',
+      email: '${provider.toLowerCase()}@sudokupro.app',
+    );
+  }
+
+  // Simpan token mock + profil lalu masuk ke Home (dipakai login & SSO).
+  Future<void> _completeAuth({
+    required String username,
+    required String email,
+  }) async {
+    await LocalStorageService.saveAuthToken(
+        'mock-${DateTime.now().millisecondsSinceEpoch}');
+    final current = SettingsService.profile.value;
+    await SettingsService.updateProfile(
+        current.copyWith(username: username, email: email));
+    if (!mounted) return;
+    Navigator.of(context).pushAndRemoveUntil(
+      MaterialPageRoute(builder: (_) => const RootShell()),
+      (route) => false,
+    );
   }
 
   @override
@@ -221,7 +257,13 @@ class _LoginScreenState extends State<LoginScreen> {
                             ),
                             TextButton(
                               onPressed: () {
-                                // Pindah ke UC-03
+                                // UC-01 A4 → UC-03
+                                Navigator.push(
+                                  context,
+                                  MaterialPageRoute(
+                                      builder: (_) =>
+                                          const ForgotPasswordScreen()),
+                                );
                               },
                               child: const Text(
                                 'Forgot password?',
@@ -287,7 +329,7 @@ class _LoginScreenState extends State<LoginScreen> {
                           children: [
                             Expanded(
                               child: OutlinedButton.icon(
-                                onPressed: () {},
+                                onPressed: () => _handleSso('Google'),
                                 icon: const Icon(Icons.g_mobiledata, color: Colors.white), // Ganti dengan aset Google asli
                                 label: const Text('Google', style: TextStyle(color: textColor)),
                                 style: OutlinedButton.styleFrom(
@@ -302,7 +344,7 @@ class _LoginScreenState extends State<LoginScreen> {
                             const SizedBox(width: 16),
                             Expanded(
                               child: OutlinedButton.icon(
-                                onPressed: () {},
+                                onPressed: () => _handleSso('Apple'),
                                 icon: const Icon(Icons.apple, color: Colors.white),
                                 label: const Text('Apple', style: TextStyle(color: textColor)),
                                 style: OutlinedButton.styleFrom(
@@ -326,7 +368,12 @@ class _LoginScreenState extends State<LoginScreen> {
                                 style: TextStyle(color: hintColor, fontSize: 12)),
                             GestureDetector(
                               onTap: () {
-                                // Pindah ke UC-02
+                                // UC-01 A6 → UC-02
+                                Navigator.push(
+                                  context,
+                                  MaterialPageRoute(
+                                      builder: (_) => const RegisterScreen()),
+                                );
                               },
                               child: const Text(
                                 'Create an Account',

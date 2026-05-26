@@ -1,11 +1,13 @@
 import 'package:flutter/material.dart';
 import '../../models/leaderboard_entry.dart';
+import '../../services/leaderboard_service.dart';
 import 'components/podium.dart';
 import 'components/scope_filter.dart';
 import 'components/leaderboard_list.dart';
 
-// UC-15: Leaderboard global/friends × daily/weekly/all-time.
-// Default state per spec: Global + Daily.
+// UC-15 + UC-16: Leaderboard global/friends × daily/weekly/all-time.
+// Default state per spec: Global + Daily. Tiap toggle memicu refetch dengan
+// parameter baru (UC-16).
 class LeaderboardScreen extends StatefulWidget {
   const LeaderboardScreen({super.key});
 
@@ -13,38 +15,49 @@ class LeaderboardScreen extends StatefulWidget {
   State<LeaderboardScreen> createState() => _LeaderboardScreenState();
 }
 
-enum LeaderboardScope { global, friends }
-
-enum LeaderboardRange { daily, weekly, allTime }
-
 class _LeaderboardScreenState extends State<LeaderboardScreen> {
   LeaderboardScope _scope = LeaderboardScope.global;
-  LeaderboardRange _range = LeaderboardRange.daily;
+  LeaderboardPeriod _period = LeaderboardPeriod.daily;
 
-  // Dummy data sampai backend leaderboard tersedia.
-  // TODO: ganti dengan fetch + cache 1–5 menit (catatan UC-15).
-  static const List<LeaderboardEntry> _allEntries = [
-    LeaderboardEntry(rank: 1, username: 'ARCHITECT', tag: 'MASTER', timeSeconds: 195, score: 9840),
-    LeaderboardEntry(rank: 2, username: 'ELARA_V', tag: 'EXPERT', timeSeconds: 222, score: 9420),
-    LeaderboardEntry(rank: 3, username: 'LOGIC_M', tag: 'EXPERT', timeSeconds: 241, score: 9210),
-    LeaderboardEntry(rank: 4, username: 'MasterMind', tag: 'PRO', timeSeconds: 245, score: 9100, isPro: true),
-    LeaderboardEntry(rank: 5, username: 'ZenSolver', tag: 'LV.18', timeSeconds: 249, score: 9020),
-    LeaderboardEntry(rank: 6, username: 'NalaGrid', tag: 'LV.15', timeSeconds: 255, score: 8910),
-    LeaderboardEntry(rank: 7, username: 'GridRunner', tag: 'LV.14', timeSeconds: 262, score: 8830),
-  ];
+  LeaderboardPage? _page;
+  bool _loading = true;
 
-  // UC-15 Step 5: "Your Ranking" sticky bar
-  static const LeaderboardEntry _you = LeaderboardEntry(
-    rank: 42,
-    username: 'You',
-    tag: 'LV.12',
-    timeSeconds: 252,
-    score: 8500,
-  );
+  @override
+  void initState() {
+    super.initState();
+    _refetch();
+  }
+
+  // UC-16: refetch dengan parameter scope/period terbaru.
+  Future<void> _refetch() async {
+    setState(() => _loading = true);
+    final page = await LeaderboardService.fetch(
+      scope: _scope,
+      period: _period,
+    );
+    if (!mounted) return;
+    setState(() {
+      _page = page;
+      _loading = false;
+    });
+  }
+
+  void _onScopeChanged(LeaderboardScope s) {
+    if (s == _scope) return;
+    setState(() => _scope = s);
+    _refetch();
+  }
+
+  void _onPeriodChanged(LeaderboardPeriod p) {
+    if (p == _period) return;
+    setState(() => _period = p);
+    _refetch();
+  }
 
   @override
   Widget build(BuildContext context) {
-    final entries = _allEntries; // filter by scope/range akan ditambahkan saat backend siap
+    final page = _page;
+    final entries = page?.entries ?? const <LeaderboardEntry>[];
     final top3 = entries.take(3).toList();
     final rest = entries.length > 3 ? entries.sublist(3) : <LeaderboardEntry>[];
 
@@ -71,23 +84,36 @@ class _LeaderboardScreenState extends State<LeaderboardScreen> {
               padding: const EdgeInsets.fromLTRB(16, 8, 16, 0),
               child: ScopeFilter(
                 scope: _scope,
-                range: _range,
-                onScopeChanged: (s) => setState(() => _scope = s),
-                onRangeChanged: (r) => setState(() => _range = r),
+                period: _period,
+                onScopeChanged: _onScopeChanged,
+                onPeriodChanged: _onPeriodChanged,
               ),
             ),
-            const SizedBox(height: 16),
-            Podium(top3: top3),
             const SizedBox(height: 16),
             Expanded(
-              child: LeaderboardList(
-                entries: rest,
-                onLoadMore: () {
-                  // TODO: pagination/infinite scroll (catatan UC-15)
-                },
-              ),
+              child: _loading
+                  ? const Center(child: CircularProgressIndicator(color: Color(0xFF5C4EE5)))
+                  : entries.isEmpty
+                      ? const Center(
+                          child: Text('No rankings yet',
+                              style: TextStyle(color: Colors.grey)),
+                        )
+                      : Column(
+                          children: [
+                            Podium(top3: top3),
+                            const SizedBox(height: 16),
+                            Expanded(
+                              child: LeaderboardList(
+                                entries: rest,
+                                onLoadMore: () {
+                                  // TODO: pagination/infinite scroll (catatan UC-15)
+                                },
+                              ),
+                            ),
+                          ],
+                        ),
             ),
-            _yourRankingBar(_you),
+            if (page != null) _yourRankingBar(page.me),
           ],
         ),
       ),

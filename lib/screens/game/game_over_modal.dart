@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../../theme/app_colors.dart';
 
 // UC-14: Modal yang muncul ketika mistakes = 3/3.
 class GameOverModal extends StatelessWidget {
@@ -8,6 +9,7 @@ class GameOverModal extends StatelessWidget {
   final VoidCallback onTryAgain; // puzzle yang sama
   final VoidCallback onNewPuzzle; // UC-06
   final VoidCallback onBackHome;
+  final VoidCallback onShare; // UC-17
 
   const GameOverModal({
     super.key,
@@ -16,6 +18,7 @@ class GameOverModal extends StatelessWidget {
     required this.onTryAgain,
     required this.onNewPuzzle,
     required this.onBackHome,
+    required this.onShare,
   });
 
   String _format(int seconds) {
@@ -26,11 +29,10 @@ class GameOverModal extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    const Color cardColor = Color(0xFF1E1E2E);
-    const Color danger = Color(0xFFE53935);
+    final c = context.colors;
 
     return Dialog(
-      backgroundColor: cardColor,
+      backgroundColor: c.surface,
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
       child: Padding(
         padding: const EdgeInsets.all(24),
@@ -41,36 +43,32 @@ class GameOverModal extends StatelessWidget {
               width: 56,
               height: 56,
               decoration: BoxDecoration(
-                color: danger.withOpacity(0.15),
+                color: c.danger.withOpacity(0.15),
                 shape: BoxShape.circle,
               ),
-              child: const Icon(Icons.close, color: danger, size: 32),
+              child: Icon(Icons.close, color: c.danger, size: 32),
             ),
             const SizedBox(height: 16),
-            const Text(
+            Text(
               'Game Over',
               style: TextStyle(
-                color: Colors.white,
+                color: c.textPrimary,
                 fontSize: 22,
                 fontWeight: FontWeight.bold,
               ),
             ),
             const SizedBox(height: 4),
-            const Text(
+            Text(
               'You reached 3 mistakes.',
-              style: TextStyle(color: Colors.grey, fontSize: 13),
+              style: TextStyle(color: c.textSecondary, fontSize: 13),
             ),
             const SizedBox(height: 20),
 
             Row(
               children: [
-                Expanded(
-                  child: _miniStat('TIME', _format(elapsedSeconds)),
-                ),
+                Expanded(child: _miniStat(c, 'TIME', _format(elapsedSeconds))),
                 const SizedBox(width: 12),
-                Expanded(
-                  child: _miniStat('FILLED', '$filledCells'),
-                ),
+                Expanded(child: _miniStat(c, 'FILLED', '$filledCells')),
               ],
             ),
             const SizedBox(height: 24),
@@ -81,7 +79,7 @@ class GameOverModal extends StatelessWidget {
               child: ElevatedButton(
                 onPressed: onTryAgain,
                 style: ElevatedButton.styleFrom(
-                  backgroundColor: const Color(0xFF5C4EE5),
+                  backgroundColor: c.primary,
                   foregroundColor: Colors.white,
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(12),
@@ -89,7 +87,8 @@ class GameOverModal extends StatelessWidget {
                 ),
                 child: const Text(
                   'TRY AGAIN',
-                  style: TextStyle(fontWeight: FontWeight.bold, letterSpacing: 1),
+                  style:
+                      TextStyle(fontWeight: FontWeight.bold, letterSpacing: 1),
                 ),
               ),
             ),
@@ -100,8 +99,8 @@ class GameOverModal extends StatelessWidget {
               child: OutlinedButton(
                 onPressed: onNewPuzzle,
                 style: OutlinedButton.styleFrom(
-                  foregroundColor: Colors.white,
-                  side: const BorderSide(color: Color(0xFF3A3A5A)),
+                  foregroundColor: c.textPrimary,
+                  side: BorderSide(color: c.gridLine),
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(12),
                   ),
@@ -110,9 +109,26 @@ class GameOverModal extends StatelessWidget {
               ),
             ),
             const SizedBox(height: 8),
+            SizedBox(
+              width: double.infinity,
+              height: 48,
+              child: OutlinedButton.icon(
+                onPressed: onShare,
+                icon: const Icon(Icons.share, size: 16),
+                label: const Text('SHARE'),
+                style: OutlinedButton.styleFrom(
+                  foregroundColor: c.textPrimary,
+                  side: BorderSide(color: c.gridLine),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                ),
+              ),
+            ),
+            const SizedBox(height: 8),
             TextButton(
               onPressed: onBackHome,
-              style: TextButton.styleFrom(foregroundColor: Colors.grey),
+              style: TextButton.styleFrom(foregroundColor: c.textSecondary),
               child: const Text('Back to Home'),
             ),
           ],
@@ -121,22 +137,21 @@ class GameOverModal extends StatelessWidget {
     );
   }
 
-  Widget _miniStat(String label, String value) {
+  Widget _miniStat(AppColors c, String label, String value) {
     return Container(
       padding: const EdgeInsets.symmetric(vertical: 12),
       decoration: BoxDecoration(
-        color: const Color(0xFF161622),
+        color: c.surface2,
         borderRadius: BorderRadius.circular(10),
       ),
       child: Column(
         children: [
-          Text(label,
-              style: const TextStyle(color: Colors.grey, fontSize: 11)),
+          Text(label, style: TextStyle(color: c.textSecondary, fontSize: 11)),
           const SizedBox(height: 4),
           Text(
             value,
-            style: const TextStyle(
-              color: Colors.white,
+            style: TextStyle(
+              color: c.textPrimary,
               fontSize: 18,
               fontWeight: FontWeight.bold,
             ),

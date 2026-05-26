@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../../../theme/app_colors.dart';
 
 class NumberPad extends StatelessWidget {
   final Function(int) onNumberPressed;
@@ -7,6 +8,7 @@ class NumberPad extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final c = context.colors;
     return GridView.builder(
       shrinkWrap: true,
       physics: const NeverScrollableScrollPhysics(),
@@ -24,14 +26,17 @@ class NumberPad extends StatelessWidget {
           borderRadius: BorderRadius.circular(8),
           child: Container(
             decoration: BoxDecoration(
-              color: const Color(0xFF232334),
+              color: c.surface2,
               borderRadius: BorderRadius.circular(8),
-              border: Border.all(color: const Color(0xFF3A3A5A), width: 0.5),
+              border: Border.all(color: c.gridLine, width: 0.5),
             ),
             child: Center(
               child: Text(
                 number.toString(),
-                style: const TextStyle(color: Colors.white, fontSize: 24, fontWeight: FontWeight.w500),
+                style: TextStyle(
+                    color: c.primary,
+                    fontSize: 24,
+                    fontWeight: FontWeight.w600),
               ),
             ),
           ),

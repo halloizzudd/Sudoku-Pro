@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../../../theme/app_colors.dart';
 
 class SudokuGrid extends StatelessWidget {
   final List<int> puzzle;
@@ -19,7 +20,6 @@ class SudokuGrid extends StatelessWidget {
   });
 
   bool _isRelatedCell(int index, int selected) {
-    // Mengecek apakah sel berada di baris, kolom, atau blok 3x3 yang sama dengan sel yang dipilih
     int row = index ~/ 9;
     int col = index % 9;
     int selRow = selected ~/ 9;
@@ -32,8 +32,8 @@ class SudokuGrid extends StatelessWidget {
     return sameRow || sameCol || sameBox;
   }
 
-  // UC-08 Alternate Flow A3: Sel dianggap conflict jika nilainya (non-zero)
-  // muncul juga di sel lain pada baris/kolom/box yang sama.
+  // UC-08 Alternate Flow A3: konflik jika nilai (non-zero) muncul lagi
+  // di baris/kolom/box yang sama.
   bool _hasConflict(int index) {
     final int value = currentBoard[index];
     if (value == 0) return false;
@@ -56,11 +56,12 @@ class SudokuGrid extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final c = context.colors;
     return Container(
       decoration: BoxDecoration(
-        border: Border.all(color: const Color(0xFF3A3A5A), width: 2),
+        border: Border.all(color: c.gridLine, width: 2),
         borderRadius: BorderRadius.circular(8),
-        color: const Color(0xFF1E1E2E),
+        color: c.surface,
       ),
       child: ClipRRect(
         borderRadius: BorderRadius.circular(6),
@@ -74,43 +75,45 @@ class SudokuGrid extends StatelessWidget {
             int value = currentBoard[index];
             bool isFixed = puzzle[index] != 0;
             bool isSelected = selectedIndex == index;
-            bool isRelated = selectedIndex != null && _isRelatedCell(index, selectedIndex!);
+            bool isRelated =
+                selectedIndex != null && _isRelatedCell(index, selectedIndex!);
             bool isError = value != 0 && !isFixed && value != solution[index];
-            // A3: sel duplikat (cocok dengan sel lain di row/col/box) — UX cue
             bool isConflict = !isFixed && _hasConflict(index);
-            // Same-value highlight: cell dengan value yang sama dengan cell terpilih
             bool isSameValue = !isSelected &&
                 selectedIndex != null &&
                 value != 0 &&
                 currentBoard[selectedIndex!] == value;
 
-            // Konfigurasi Warna berdasarkan state UC-08
+            // Warna sel berdasarkan state (UC-08), reaktif terhadap tema.
             Color cellColor = Colors.transparent;
             if (isSelected) {
-              cellColor = const Color(0xFF5C4EE5).withOpacity(0.5); // Biru highlight
+              cellColor = c.cellSelected;
             } else if (isConflict) {
-              cellColor = const Color(0xFFE53935).withOpacity(0.18); // A3 conflict tint
+              cellColor = c.danger.withOpacity(0.18);
             } else if (isSameValue) {
-              cellColor = const Color(0xFF5C4EE5).withOpacity(0.18);
+              cellColor = c.primary.withOpacity(0.18);
             } else if (isRelated) {
-              cellColor = const Color(0xFF2A2A4A); // Highlight baris/kolom/box
+              cellColor = c.cellRelated;
             }
 
-            Color textColor = Colors.white;
+            Color textColor = c.textPrimary;
             if (isFixed) {
-              textColor = Colors.grey[400]!;
+              textColor = c.textSecondary;
             } else if (isError || isConflict) {
-              textColor = Colors.redAccent;
+              textColor = c.danger;
             } else if (value != 0) {
-              textColor = const Color(0xFF5C4EE5); // Warna angka input player (Benar)
+              textColor = c.primary; // angka input player (benar)
             }
 
-            // Logika Border 3x3 (Tebal untuk pemisah blok 3x3)
             int row = index ~/ 9;
             int col = index % 9;
             Border border = Border(
-              bottom: BorderSide(color: const Color(0xFF3A3A5A), width: (row % 3 == 2 && row != 8) ? 2 : 0.5),
-              right: BorderSide(color: const Color(0xFF3A3A5A), width: (col % 3 == 2 && col != 8) ? 2 : 0.5),
+              bottom: BorderSide(
+                  color: c.gridLine,
+                  width: (row % 3 == 2 && row != 8) ? 2 : 0.5),
+              right: BorderSide(
+                  color: c.gridLine,
+                  width: (col % 3 == 2 && col != 8) ? 2 : 0.5),
             );
 
             final Set<int> cellNotes = notes[index];
@@ -129,13 +132,14 @@ class SudokuGrid extends StatelessWidget {
                           style: TextStyle(
                             color: textColor,
                             fontSize: 20,
-                            fontWeight: isFixed ? FontWeight.normal : FontWeight.bold,
+                            fontWeight:
+                                isFixed ? FontWeight.normal : FontWeight.bold,
                           ),
                         ),
                       )
                     : (cellNotes.isEmpty
                         ? const SizedBox.shrink()
-                        : _NotesGrid(notes: cellNotes)),
+                        : _NotesGrid(notes: cellNotes, color: c.cellNote)),
               ),
             );
           },
@@ -148,7 +152,8 @@ class SudokuGrid extends StatelessWidget {
 // UC-11: render notes sebagai mini-grid 3x3 di dalam sel.
 class _NotesGrid extends StatelessWidget {
   final Set<int> notes;
-  const _NotesGrid({required this.notes});
+  final Color color;
+  const _NotesGrid({required this.notes, required this.color});
 
   @override
   Widget build(BuildContext context) {
@@ -166,11 +171,7 @@ class _NotesGrid extends StatelessWidget {
           return Center(
             child: Text(
               show ? '$n' : '',
-              style: const TextStyle(
-                color: Color(0xFFB0B0C0),
-                fontSize: 8,
-                height: 1,
-              ),
+              style: TextStyle(color: color, fontSize: 8, height: 1),
             ),
           );
         },

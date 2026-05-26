@@ -1,4 +1,8 @@
 import 'package:flutter/material.dart';
+import '../../services/local_storage_service.dart';
+import '../../services/settings_service.dart';
+import '../root_shell.dart';
+import 'linking_dialog.dart';
 
 class RegisterScreen extends StatefulWidget {
   const RegisterScreen({super.key});
@@ -9,6 +13,7 @@ class RegisterScreen extends StatefulWidget {
 
 class _RegisterScreenState extends State<RegisterScreen> {
   final _formKey = GlobalKey<FormState>();
+  final TextEditingController _usernameController = TextEditingController();
   final TextEditingController _emailController = TextEditingController();
   final TextEditingController _passwordController = TextEditingController();
   final TextEditingController _confirmPasswordController = TextEditingController();
@@ -32,13 +37,11 @@ class _RegisterScreenState extends State<RegisterScreen> {
         // TODO: Implementasi register API sebenarnya di sini
         // bool isSuccess = await authService.register(...);
 
-        // Simulasi sukses (Step 7 & 8: Auto-login & redirect Home)
-        if (mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(content: Text('Registrasi berhasil! Mengalihkan...')),
-          );
-          // Navigator.pushReplacementNamed(context, '/home');
-        }
+        // Step 7 & 8: auto-login & redirect Home.
+        await _completeAuth(
+          username: _usernameController.text.trim(),
+          email: _emailController.text.trim(),
+        );
       } catch (e) {
         // Simulasi A1 - Email sudah terdaftar
         if (mounted) {
@@ -56,8 +59,42 @@ class _RegisterScreenState extends State<RegisterScreen> {
     }
   }
 
+  // UC-04: SSO dummy — "Linking account..." lalu register/login lokal.
+  Future<void> _handleSso(String provider) async {
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (_) => const LinkingDialog(),
+    );
+    await Future.delayed(const Duration(milliseconds: 1500));
+    if (!mounted) return;
+    Navigator.of(context).pop();
+    await _completeAuth(
+      username: '$provider Player',
+      email: '${provider.toLowerCase()}@sudokupro.app',
+    );
+  }
+
+  // Simpan token mock + profil lalu masuk Home (dipakai register & SSO).
+  Future<void> _completeAuth({
+    required String username,
+    required String email,
+  }) async {
+    await LocalStorageService.saveAuthToken(
+        'mock-${DateTime.now().millisecondsSinceEpoch}');
+    final current = SettingsService.profile.value;
+    await SettingsService.updateProfile(
+        current.copyWith(username: username, email: email));
+    if (!mounted) return;
+    Navigator.of(context).pushAndRemoveUntil(
+      MaterialPageRoute(builder: (_) => const RootShell()),
+      (route) => false,
+    );
+  }
+
   @override
   void dispose() {
+    _usernameController.dispose();
     _emailController.dispose();
     _passwordController.dispose();
     _confirmPasswordController.dispose();
@@ -120,6 +157,39 @@ class _RegisterScreenState extends State<RegisterScreen> {
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
+                        // Username Field (UC-02: wajib)
+                        const Text('USERNAME',
+                            style: TextStyle(color: hintColor, fontSize: 12)),
+                        const SizedBox(height: 8),
+                        TextFormField(
+                          controller: _usernameController,
+                          style: const TextStyle(color: textColor),
+                          decoration: InputDecoration(
+                            hintText: 'choose a username',
+                            hintStyle: const TextStyle(color: hintColor),
+                            prefixIcon: const Icon(Icons.person_outline,
+                                color: hintColor),
+                            filled: true,
+                            fillColor: bgColor,
+                            border: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(8),
+                              borderSide: BorderSide.none,
+                            ),
+                          ),
+                          // Aturan UC-02: 3–20 karakter, alfanumerik + underscore
+                          validator: (value) {
+                            if (value == null || value.isEmpty) {
+                              return 'Username tidak boleh kosong';
+                            }
+                            final re = RegExp(r'^[A-Za-z0-9_]{3,20}$');
+                            if (!re.hasMatch(value)) {
+                              return '3-20 karakter, alfanumerik / underscore';
+                            }
+                            return null;
+                          },
+                        ),
+                        const SizedBox(height: 16),
+
                         // Email Field
                         const Text('EMAIL ADDRESS',
                             style: TextStyle(color: hintColor, fontSize: 12)),
@@ -325,7 +395,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                           children: [
                             Expanded(
                               child: OutlinedButton.icon(
-                                onPressed: () {},
+                                onPressed: () => _handleSso('Google'),
                                 icon: const Icon(Icons.g_mobiledata, color: Colors.white),
                                 label: const Text('Google', style: TextStyle(color: textColor)),
                                 style: OutlinedButton.styleFrom(
@@ -340,7 +410,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                             const SizedBox(width: 16),
                             Expanded(
                               child: OutlinedButton.icon(
-                                onPressed: () {},
+                                onPressed: () => _handleSso('Apple'),
                                 icon: const Icon(Icons.apple, color: Colors.white),
                                 label: const Text('Apple', style: TextStyle(color: textColor)),
                                 style: OutlinedButton.styleFrom(

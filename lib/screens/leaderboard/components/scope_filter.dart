@@ -1,19 +1,19 @@
 import 'package:flutter/material.dart';
-import '../leaderboard_screen.dart';
+import '../../../services/leaderboard_service.dart';
 
-// Dua baris filter: scope (Global/Friends) + range (Daily/Weekly/All Time).
+// Dua baris filter: scope (Global/Friends) + period (Daily/Weekly/All Time).
 class ScopeFilter extends StatelessWidget {
   final LeaderboardScope scope;
-  final LeaderboardRange range;
+  final LeaderboardPeriod period;
   final ValueChanged<LeaderboardScope> onScopeChanged;
-  final ValueChanged<LeaderboardRange> onRangeChanged;
+  final ValueChanged<LeaderboardPeriod> onPeriodChanged;
 
   const ScopeFilter({
     super.key,
     required this.scope,
-    required this.range,
+    required this.period,
     required this.onScopeChanged,
-    required this.onRangeChanged,
+    required this.onPeriodChanged,
   });
 
   @override
@@ -43,14 +43,14 @@ class ScopeFilter extends StatelessWidget {
           ),
         ),
         const SizedBox(height: 12),
-        // Range pills
+        // Period pills
         Row(
           children: [
-            _rangePill('DAILY', LeaderboardRange.daily),
+            _periodPill('DAILY', LeaderboardPeriod.daily),
             const SizedBox(width: 8),
-            _rangePill('WEEKLY', LeaderboardRange.weekly),
+            _periodPill('WEEKLY', LeaderboardPeriod.weekly),
             const SizedBox(width: 8),
-            _rangePill('ALL TIME', LeaderboardRange.allTime),
+            _periodPill('ALL TIME', LeaderboardPeriod.allTime),
           ],
         ),
       ],
@@ -86,10 +86,10 @@ class ScopeFilter extends StatelessWidget {
     );
   }
 
-  Widget _rangePill(String label, LeaderboardRange r) {
-    final bool selected = range == r;
+  Widget _periodPill(String label, LeaderboardPeriod p) {
+    final bool selected = period == p;
     return GestureDetector(
-      onTap: () => onRangeChanged(r),
+      onTap: () => onPeriodChanged(p),
       child: Container(
         padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
         decoration: BoxDecoration(

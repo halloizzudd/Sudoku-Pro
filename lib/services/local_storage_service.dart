@@ -5,6 +5,25 @@ import '../models/player_stats.dart';
 class LocalStorageService {
   static const String _activeGameKey = 'active_game_session';
   static const String _statsKey = 'player_stats';
+  static const String _authTokenKey = 'auth_token';
+
+  // UC-01/02/04/05 + Auth Gate: token sesi (mock untuk MVP).
+  static Future<void> saveAuthToken(String token) async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setString(_authTokenKey, token);
+  }
+
+  static Future<String?> getAuthToken() async {
+    final prefs = await SharedPreferences.getInstance();
+    return prefs.getString(_authTokenKey);
+  }
+
+  static Future<bool> isLoggedIn() async => (await getAuthToken()) != null;
+
+  static Future<void> clearAuthToken() async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.remove(_authTokenKey);
+  }
 
   // Menyimpan progress game (Dipanggil dengan debounce saat user input di UC-08)
   static Future<void> saveGameSession(GameSession session) async {

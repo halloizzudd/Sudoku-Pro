@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../theme/app_colors.dart';
 import 'home/home_screen.dart';
 import 'leaderboard/leaderboard_screen.dart';
 import 'stats/stats_screen.dart';
@@ -25,8 +26,9 @@ class _RootShellState extends State<RootShell> {
 
   @override
   Widget build(BuildContext context) {
+    final c = context.colors;
     return Scaffold(
-      backgroundColor: const Color(0xFF0F0F1A),
+      backgroundColor: c.background,
       body: IndexedStack(index: _index, children: _tabs),
       bottomNavigationBar: Theme(
         data: Theme.of(context).copyWith(
@@ -34,12 +36,12 @@ class _RootShellState extends State<RootShell> {
           highlightColor: Colors.transparent,
         ),
         child: BottomNavigationBar(
-          backgroundColor: const Color(0xFF0F0F1A),
+          backgroundColor: c.surface,
           type: BottomNavigationBarType.fixed,
           currentIndex: _index,
           onTap: (i) => setState(() => _index = i),
-          selectedItemColor: const Color(0xFFF59E0B),
-          unselectedItemColor: Colors.grey,
+          selectedItemColor: c.accent,
+          unselectedItemColor: c.textSecondary,
           selectedFontSize: 12,
           unselectedFontSize: 12,
           items: const [

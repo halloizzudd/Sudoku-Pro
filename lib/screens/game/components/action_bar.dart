@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import '../../../services/l10n.dart';
+import '../../../theme/app_colors.dart';
 
 class ActionBar extends StatelessWidget {
   final bool isNotesActive;
@@ -22,40 +24,44 @@ class ActionBar extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final c = context.colors;
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
         _actionButton(
+          c,
           Icons.undo,
-          'UNDO',
+          L10n.t('undo'),
           canUndo ? onUndo : () {}, // UC-10 A1: no-op jika stack kosong
           isDisabled: !canUndo,
         ),
-        _actionButton(Icons.backspace_outlined, 'ERASE', onErase),
+        _actionButton(c, Icons.backspace_outlined, L10n.t('erase'), onErase),
         _actionButton(
+          c,
           Icons.edit,
-          'NOTES',
+          L10n.t('notes'),
           onNotesToggled,
           isActive: isNotesActive,
         ),
         _actionButton(
+          c,
           Icons.lightbulb_outline,
-          'HINT',
+          L10n.t('hint'),
           hintsRemaining > 0 ? onHint : () {}, // UC-12 A1: no-op kalau quota habis
           badge: hintsRemaining > 0 ? '$hintsRemaining' : null,
-          accentColor: Colors.orange,
+          accentColor: c.accent,
           isDisabled: hintsRemaining <= 0,
         ),
       ],
     );
   }
 
-  Widget _actionButton(IconData icon, String label, VoidCallback onTap,
+  Widget _actionButton(AppColors c, IconData icon, String label, VoidCallback onTap,
       {bool isActive = false, bool isDisabled = false, String? badge, Color? accentColor}) {
 
-    Color activeColor = accentColor ?? const Color(0xFF5C4EE5);
-    Color defaultColor = isDisabled ? const Color(0xFF3A3A5A) : Colors.grey;
-    
+    Color activeColor = accentColor ?? c.primary;
+    Color defaultColor = isDisabled ? c.gridLine : c.textSecondary;
+
     return GestureDetector(
       onTap: onTap,
       child: Column(
@@ -67,7 +73,7 @@ class ActionBar extends StatelessWidget {
                 padding: const EdgeInsets.all(16),
                 decoration: BoxDecoration(
                   color: isActive ? activeColor.withOpacity(0.2) : Colors.transparent,
-                  border: Border.all(color: isActive ? activeColor : const Color(0xFF3A3A5A)),
+                  border: Border.all(color: isActive ? activeColor : c.gridLine),
                   borderRadius: BorderRadius.circular(12),
                 ),
                 child: Icon(icon, color: isActive ? activeColor : defaultColor, size: 24),
@@ -78,7 +84,7 @@ class ActionBar extends StatelessWidget {
                   top: -5,
                   child: Container(
                     padding: const EdgeInsets.all(6),
-                    decoration: const BoxDecoration(color: Colors.orange, shape: BoxShape.circle),
+                    decoration: BoxDecoration(color: c.accent, shape: BoxShape.circle),
                     child: Text(badge, style: const TextStyle(color: Colors.white, fontSize: 10, fontWeight: FontWeight.bold)),
                   ),
                 ),
