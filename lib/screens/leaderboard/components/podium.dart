@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import '../../../models/leaderboard_entry.dart';
+import '../../../theme/app_colors.dart';
 
 // UC-15 Step 3: Top 3 podium. Rank 1 di tengah (lebih tinggi & dengan crown),
 // rank 2 di kiri, rank 3 di kanan.
@@ -18,6 +19,7 @@ class Podium extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final c = context.colors;
     final first = _byRank(1);
     final second = _byRank(2);
     final third = _byRank(3);
@@ -32,6 +34,7 @@ class Podium extends StatelessWidget {
             Align(
               alignment: Alignment.bottomCenter,
               child: _podiumCard(
+                c: c,
                 entry: first,
                 accent: const Color(0xFFFFB938),
                 width: 130,
@@ -45,6 +48,7 @@ class Podium extends StatelessWidget {
               child: Padding(
                 padding: const EdgeInsets.only(left: 8, bottom: 8),
                 child: _podiumCard(
+                  c: c,
                   entry: second,
                   accent: Colors.grey,
                   width: 110,
@@ -58,6 +62,7 @@ class Podium extends StatelessWidget {
               child: Padding(
                 padding: const EdgeInsets.only(right: 8, bottom: 8),
                 child: _podiumCard(
+                  c: c,
                   entry: third,
                   accent: const Color(0xFFCD7F32),
                   width: 110,
@@ -71,6 +76,7 @@ class Podium extends StatelessWidget {
   }
 
   Widget _podiumCard({
+    required AppColors c,
     required LeaderboardEntry entry,
     required Color accent,
     required double width,
@@ -90,7 +96,7 @@ class Podium extends StatelessWidget {
             height: 56,
             decoration: BoxDecoration(
               shape: BoxShape.circle,
-              color: const Color(0xFF2A2A4A),
+              color: c.surface2,
               border: Border.all(color: accent, width: 2),
             ),
             child: Center(
@@ -109,7 +115,7 @@ class Podium extends StatelessWidget {
             height: height - 56,
             padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 4),
             decoration: BoxDecoration(
-              color: showCrown ? const Color(0xFF5C4EE5) : const Color(0xFF1E1E2E),
+              color: showCrown ? c.primary : c.surface,
               borderRadius: const BorderRadius.vertical(
                 top: Radius.circular(12),
               ),
@@ -120,13 +126,16 @@ class Podium extends StatelessWidget {
                 Text(
                   entry.username,
                   overflow: TextOverflow.ellipsis,
-                  style: const TextStyle(color: Colors.white, fontSize: 11, fontWeight: FontWeight.bold),
+                  style: TextStyle(
+                      color: showCrown ? Colors.white : c.textPrimary,
+                      fontSize: 11,
+                      fontWeight: FontWeight.bold),
                 ),
                 const SizedBox(height: 4),
                 Text(
                   _fmt(entry.timeSeconds),
                   style: TextStyle(
-                    color: showCrown ? const Color(0xFFFFB938) : Colors.white,
+                    color: showCrown ? const Color(0xFFFFB938) : c.textPrimary,
                     fontSize: 16,
                     fontWeight: FontWeight.bold,
                   ),

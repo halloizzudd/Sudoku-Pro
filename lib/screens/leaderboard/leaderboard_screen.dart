@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import '../../models/leaderboard_entry.dart';
 import '../../services/leaderboard_service.dart';
+import '../../theme/app_colors.dart';
 import 'components/podium.dart';
 import 'components/scope_filter.dart';
 import 'components/leaderboard_list.dart';
@@ -56,24 +57,28 @@ class _LeaderboardScreenState extends State<LeaderboardScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final c = context.colors;
     final page = _page;
     final entries = page?.entries ?? const <LeaderboardEntry>[];
     final top3 = entries.take(3).toList();
     final rest = entries.length > 3 ? entries.sublist(3) : <LeaderboardEntry>[];
 
     return Scaffold(
-      backgroundColor: const Color(0xFF0F0F1A),
+      backgroundColor: c.background,
       appBar: AppBar(
-        backgroundColor: const Color(0xFF0F0F1A),
+        backgroundColor: c.background,
         elevation: 0,
-        title: const Text(
+        title: Text(
           'SUDOKU PRO',
-          style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold, letterSpacing: 1.5),
+          style: TextStyle(color: c.textPrimary, fontWeight: FontWeight.bold, letterSpacing: 1.5),
         ),
         actions: [
           IconButton(
-            icon: const Icon(Icons.search, color: Colors.white),
-            onPressed: () {}, // TODO: cari user di leaderboard
+            icon: Icon(Icons.search, color: c.textPrimary),
+            onPressed: () => showSearch(
+              context: context,
+              delegate: _LeaderboardSearchDelegate(entries, c),
+            ),
           ),
         ],
       ),
@@ -92,11 +97,11 @@ class _LeaderboardScreenState extends State<LeaderboardScreen> {
             const SizedBox(height: 16),
             Expanded(
               child: _loading
-                  ? const Center(child: CircularProgressIndicator(color: Color(0xFF5C4EE5)))
+                  ? Center(child: CircularProgressIndicator(color: c.primary))
                   : entries.isEmpty
-                      ? const Center(
+                      ? Center(
                           child: Text('No rankings yet',
-                              style: TextStyle(color: Colors.grey)),
+                              style: TextStyle(color: c.textSecondary)),
                         )
                       : Column(
                           children: [
@@ -113,7 +118,7 @@ class _LeaderboardScreenState extends State<LeaderboardScreen> {
                           ],
                         ),
             ),
-            if (page != null) _yourRankingBar(page.me),
+            if (page != null) _yourRankingBar(c, page.me),
           ],
         ),
       ),
@@ -121,12 +126,12 @@ class _LeaderboardScreenState extends State<LeaderboardScreen> {
   }
 
   // UC-15 step 5: sticky "Your Ranking" bar di bawah.
-  Widget _yourRankingBar(LeaderboardEntry me) {
+  Widget _yourRankingBar(AppColors c, LeaderboardEntry me) {
     return Container(
       margin: const EdgeInsets.fromLTRB(12, 0, 12, 12),
       padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
       decoration: BoxDecoration(
-        color: const Color(0xFF5C4EE5),
+        color: c.primary,
         borderRadius: BorderRadius.circular(14),
       ),
       child: Row(
@@ -169,5 +174,120 @@ class _LeaderboardScreenState extends State<LeaderboardScreen> {
     final m = (seconds ~/ 60).toString().padLeft(2, '0');
     final s = (seconds % 60).toString().padLeft(2, '0');
     return '$m:$s';
+  }
+}
+
+// Pencarian user di leaderboard (memfilter entri yang sudah dimuat).
+class _LeaderboardSearchDelegate extends SearchDelegate<void> {
+  final List<LeaderboardEntry> entries;
+  final AppColors c;
+
+  _LeaderboardSearchDelegate(this.entries, this.c)
+      : super(searchFieldLabel: 'Search players');
+
+  static String _fmt(int s) {
+    final m = (s ~/ 60).toString().padLeft(2, '0');
+    final ss = (s % 60).toString().padLeft(2, '0');
+    return '$m:$ss';
+  }
+
+  @override
+  ThemeData appBarTheme(BuildContext context) {
+    final base = Theme.of(context);
+    return base.copyWith(
+      scaffoldBackgroundColor: c.background,
+      appBarTheme: AppBarTheme(
+        backgroundColor: c.background,
+        elevation: 0,
+        iconTheme: IconThemeData(color: c.textPrimary),
+        titleTextStyle: TextStyle(color: c.textPrimary, fontSize: 18),
+      ),
+      inputDecorationTheme: InputDecorationTheme(
+        hintStyle: TextStyle(color: c.textSecondary),
+        border: InputBorder.none,
+      ),
+      textTheme: base.textTheme.copyWith(
+        titleLarge: TextStyle(color: c.textPrimary, fontSize: 18),
+      ),
+    );
+  }
+
+  @override
+  List<Widget> buildActions(BuildContext context) => [
+        if (query.isNotEmpty)
+          IconButton(
+            icon: Icon(Icons.clear, color: c.textPrimary),
+            onPressed: () => query = '',
+          ),
+      ];
+
+  @override
+  Widget buildLeading(BuildContext context) => IconButton(
+        icon: Icon(Icons.arrow_back, color: c.textPrimary),
+        onPressed: () => close(context, null),
+      );
+
+  @override
+  Widget buildResults(BuildContext context) => _list();
+
+  @override
+  Widget buildSuggestions(BuildContext context) => _list();
+
+  Widget _list() {
+    final q = query.trim().toLowerCase();
+    final matches = q.isEmpty
+        ? entries
+        : entries
+            .where((e) => e.username.toLowerCase().contains(q))
+            .toList();
+
+    if (matches.isEmpty) {
+      return Container(
+        color: c.background,
+        alignment: Alignment.center,
+        child: Text('No players found',
+            style: TextStyle(color: c.textSecondary)),
+      );
+    }
+
+    return Container(
+      color: c.background,
+      child: ListView.separated(
+        padding: const EdgeInsets.all(12),
+        itemCount: matches.length,
+        separatorBuilder: (_, __) => const SizedBox(height: 8),
+        itemBuilder: (context, i) {
+          final e = matches[i];
+          return Container(
+            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
+            decoration: BoxDecoration(
+              color: c.surface,
+              borderRadius: BorderRadius.circular(12),
+            ),
+            child: Row(
+              children: [
+                SizedBox(
+                  width: 32,
+                  child: Text('#${e.rank}',
+                      style: TextStyle(
+                          color: c.textPrimary,
+                          fontWeight: FontWeight.bold)),
+                ),
+                const SizedBox(width: 8),
+                Expanded(
+                  child: Text(e.username,
+                      overflow: TextOverflow.ellipsis,
+                      style: TextStyle(
+                          color: c.textPrimary,
+                          fontWeight: FontWeight.bold)),
+                ),
+                Text(_fmt(e.timeSeconds),
+                    style: TextStyle(color: c.textSecondary)),
+              ],
+            ),
+          );
+        },
+      ),
+    );
   }
 }

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import '../services/local_storage_service.dart';
+import '../theme/app_colors.dart';
 import 'auth/login_screen.dart';
 import 'root_shell.dart';
 
@@ -31,10 +32,11 @@ class _AuthGateState extends State<AuthGate> {
   @override
   Widget build(BuildContext context) {
     if (_loggedIn == null) {
-      return const Scaffold(
-        backgroundColor: Color(0xFF0F0F1A),
+      final c = context.colors;
+      return Scaffold(
+        backgroundColor: c.background,
         body: Center(
-          child: CircularProgressIndicator(color: Color(0xFF5C4EE5)),
+          child: CircularProgressIndicator(color: c.primary),
         ),
       );
     }

@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import '../../models/user_profile.dart';
 import '../../services/settings_service.dart';
+import '../../theme/app_colors.dart';
 
 // UC-20: Edit Profile — upload avatar, ubah username, ubah email (re-verify),
 // ubah password. Persist via SettingsService (TODO: PATCH /users/me).
@@ -12,10 +12,7 @@ class EditProfileScreen extends StatefulWidget {
 }
 
 class _EditProfileScreenState extends State<EditProfileScreen> {
-  static const Color _bg = Color(0xFF0F0F1A);
-  static const Color _card = Color(0xFF1A1A2E);
-  static const Color _indigo = Color(0xFF5C4EE5);
-  static const Color _hint = Colors.grey;
+  late AppColors c;
 
   final _formKey = GlobalKey<FormState>();
   late final TextEditingController _username;
@@ -70,15 +67,16 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
 
   @override
   Widget build(BuildContext context) {
+    c = context.colors;
     return Scaffold(
-      backgroundColor: _bg,
+      backgroundColor: c.background,
       appBar: AppBar(
-        backgroundColor: _bg,
+        backgroundColor: c.background,
         elevation: 0,
-        iconTheme: const IconThemeData(color: Colors.white),
-        title: const Text('EDIT PROFILE',
+        iconTheme: IconThemeData(color: c.textPrimary),
+        title: Text('EDIT PROFILE',
             style: TextStyle(
-                color: Colors.white,
+                color: c.textPrimary,
                 fontWeight: FontWeight.bold,
                 letterSpacing: 1.2)),
       ),
@@ -114,15 +112,15 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
                 return null;
               },
             ),
-            const Padding(
-              padding: EdgeInsets.only(top: 6, left: 4),
+            Padding(
+              padding: const EdgeInsets.only(top: 6, left: 4),
               child: Text('Changing your email requires re-verification.',
-                  style: TextStyle(color: _hint, fontSize: 11)),
+                  style: TextStyle(color: c.textSecondary, fontSize: 11)),
             ),
             const SizedBox(height: 28),
-            const Text('CHANGE PASSWORD',
+            Text('CHANGE PASSWORD',
                 style: TextStyle(
-                    color: _hint,
+                    color: c.textSecondary,
                     fontSize: 12,
                     fontWeight: FontWeight.bold,
                     letterSpacing: 0.5)),
@@ -158,7 +156,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
               child: ElevatedButton(
                 onPressed: _saving ? null : _save,
                 style: ElevatedButton.styleFrom(
-                  backgroundColor: _indigo,
+                  backgroundColor: c.primary,
                   shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(12)),
                 ),
@@ -190,11 +188,11 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
         children: [
           CircleAvatar(
             radius: 48,
-            backgroundColor: _card,
+            backgroundColor: c.surface,
             backgroundImage:
                 p.avatarPath != null ? AssetImage(p.avatarPath!) : null,
             child: p.avatarPath == null
-                ? const Icon(Icons.person, color: Colors.white70, size: 48)
+                ? Icon(Icons.person, color: c.textSecondary, size: 48)
                 : null,
           ),
           Positioned(
@@ -210,9 +208,9 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
               child: Container(
                 padding: const EdgeInsets.all(8),
                 decoration: BoxDecoration(
-                  color: _indigo,
+                  color: c.primary,
                   shape: BoxShape.circle,
-                  border: Border.all(color: _bg, width: 2),
+                  border: Border.all(color: c.background, width: 2),
                 ),
                 child: const Icon(Icons.camera_alt,
                     color: Colors.white, size: 18),
@@ -227,7 +225,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
   Widget _label(String text) => Padding(
         padding: const EdgeInsets.only(bottom: 8),
         child: Text(text,
-            style: const TextStyle(color: _hint, fontSize: 12)),
+            style: TextStyle(color: c.textSecondary, fontSize: 12)),
       );
 
   Widget _field({
@@ -242,14 +240,14 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
       controller: controller,
       obscureText: obscure,
       keyboardType: keyboardType,
-      style: const TextStyle(color: Colors.white),
+      style: TextStyle(color: c.textPrimary),
       validator: validator,
       decoration: InputDecoration(
         hintText: hint,
-        hintStyle: const TextStyle(color: _hint),
-        prefixIcon: Icon(icon, color: _hint),
+        hintStyle: TextStyle(color: c.textSecondary),
+        prefixIcon: Icon(icon, color: c.textSecondary),
         filled: true,
-        fillColor: _card,
+        fillColor: c.inputFill,
         border: OutlineInputBorder(
           borderRadius: BorderRadius.circular(10),
           borderSide: BorderSide.none,

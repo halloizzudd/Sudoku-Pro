@@ -81,19 +81,20 @@ class _HomeScreenState extends State<HomeScreen> {
     showDialog(
       context: context,
       builder: (BuildContext context) {
+        final c = context.colors;
         return AlertDialog(
-          backgroundColor: const Color(0xFF1E1E2E),
+          backgroundColor: c.surface,
           title: Text(L10n.t('startNewGameTitle'),
-              style: const TextStyle(color: Colors.white)),
+              style: TextStyle(color: c.textPrimary)),
           content: Text(
             L10n.t('startNewGameBody'),
-            style: const TextStyle(color: Colors.grey),
+            style: TextStyle(color: c.textSecondary),
           ),
           actions: [
             TextButton(
               onPressed: () => Navigator.pop(context),
               child:
-                  Text(L10n.t('cancel'), style: const TextStyle(color: Colors.grey)),
+                  Text(L10n.t('cancel'), style: TextStyle(color: c.textSecondary)),
             ),
             TextButton(
               onPressed: () {
@@ -101,7 +102,7 @@ class _HomeScreenState extends State<HomeScreen> {
                 _startNewGame(difficulty);
               },
               child: Text(L10n.t('continueBtn'),
-                  style: const TextStyle(color: Color(0xFF5C4EE5))),
+                  style: TextStyle(color: c.primary)),
             ),
           ],
         );
@@ -176,7 +177,7 @@ class _HomeScreenState extends State<HomeScreen> {
 
                 // 2. New Game (UC-06)
                 Text(L10n.t('newGame'),
-                    style: const TextStyle(
+                    style: TextStyle(
                         color: textColor,
                         fontSize: 16,
                         fontWeight: FontWeight.bold)),

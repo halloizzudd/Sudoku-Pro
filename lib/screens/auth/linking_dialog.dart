@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../../theme/app_colors.dart';
 
 // UC-04: dialog loading saat menautkan akun SSO.
 class LinkingDialog extends StatelessWidget {
@@ -6,11 +7,12 @@ class LinkingDialog extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final c = context.colors;
     return Dialog(
-      backgroundColor: const Color(0xFF1E1E2E),
+      backgroundColor: c.surface,
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-      child: const Padding(
-        padding: EdgeInsets.symmetric(horizontal: 24, vertical: 28),
+      child: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 28),
         child: Row(
           mainAxisSize: MainAxisSize.min,
           children: [
@@ -18,11 +20,11 @@ class LinkingDialog extends StatelessWidget {
               width: 22,
               height: 22,
               child: CircularProgressIndicator(
-                  strokeWidth: 2.5, color: Color(0xFF5C4EE5)),
+                  strokeWidth: 2.5, color: c.primary),
             ),
-            SizedBox(width: 18),
+            const SizedBox(width: 18),
             Text('Linking account...',
-                style: TextStyle(color: Colors.white, fontSize: 15)),
+                style: TextStyle(color: c.textPrimary, fontSize: 15)),
           ],
         ),
       ),

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../../theme/app_colors.dart';
 
 // GAP-06: Friends (mockup). Tambah teman by username (dummy success/fail) +
 // daftar teman statis dengan status online & skor. Backend menyusul.
@@ -17,10 +18,9 @@ class FriendsScreen extends StatefulWidget {
 }
 
 class _FriendsScreenState extends State<FriendsScreen> {
-  static const Color _bg = Color(0xFF0F0F1A);
-  static const Color _card = Color(0xFF1A1A2E);
-  static const Color _indigo = Color(0xFF5C4EE5);
+  static const Color _online = Color(0xFF22C55E);
 
+  late AppColors c;
   final _controller = TextEditingController();
   bool _adding = false;
 
@@ -73,15 +73,16 @@ class _FriendsScreenState extends State<FriendsScreen> {
 
   @override
   Widget build(BuildContext context) {
+    c = context.colors;
     return Scaffold(
-      backgroundColor: _bg,
+      backgroundColor: c.background,
       appBar: AppBar(
-        backgroundColor: _bg,
+        backgroundColor: c.background,
         elevation: 0,
-        iconTheme: const IconThemeData(color: Colors.white),
-        title: const Text('FRIENDS',
+        iconTheme: IconThemeData(color: c.textPrimary),
+        title: Text('FRIENDS',
             style: TextStyle(
-                color: Colors.white,
+                color: c.textPrimary,
                 fontWeight: FontWeight.bold,
                 letterSpacing: 1.2)),
       ),
@@ -94,16 +95,16 @@ class _FriendsScreenState extends State<FriendsScreen> {
                 Expanded(
                   child: TextField(
                     controller: _controller,
-                    style: const TextStyle(color: Colors.white),
+                    style: TextStyle(color: c.textPrimary),
                     textInputAction: TextInputAction.done,
                     onSubmitted: (_) => _addFriend(),
                     decoration: InputDecoration(
                       hintText: 'Add friend by username',
-                      hintStyle: const TextStyle(color: Colors.grey),
+                      hintStyle: TextStyle(color: c.textSecondary),
                       prefixIcon:
-                          const Icon(Icons.person_add_alt, color: Colors.grey),
+                          Icon(Icons.person_add_alt, color: c.textSecondary),
                       filled: true,
-                      fillColor: _card,
+                      fillColor: c.inputFill,
                       border: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(10),
                         borderSide: BorderSide.none,
@@ -117,7 +118,7 @@ class _FriendsScreenState extends State<FriendsScreen> {
                   child: ElevatedButton(
                     onPressed: _adding ? null : _addFriend,
                     style: ElevatedButton.styleFrom(
-                      backgroundColor: _indigo,
+                      backgroundColor: c.primary,
                       shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(10)),
                     ),
@@ -142,8 +143,8 @@ class _FriendsScreenState extends State<FriendsScreen> {
             child: Align(
               alignment: Alignment.centerLeft,
               child: Text('${_friends.length} FRIENDS',
-                  style: const TextStyle(
-                      color: Colors.grey,
+                  style: TextStyle(
+                      color: c.textSecondary,
                       fontSize: 12,
                       fontWeight: FontWeight.bold,
                       letterSpacing: 0.8)),
@@ -166,17 +167,17 @@ class _FriendsScreenState extends State<FriendsScreen> {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
       decoration: BoxDecoration(
-        color: _card,
+        color: c.surface,
         borderRadius: BorderRadius.circular(14),
       ),
       child: Row(
         children: [
           Stack(
             children: [
-              const CircleAvatar(
+              CircleAvatar(
                 radius: 20,
-                backgroundColor: Color(0xFF2A2A4A),
-                child: Icon(Icons.person, color: Colors.white, size: 20),
+                backgroundColor: c.surface2,
+                child: Icon(Icons.person, color: c.textPrimary, size: 20),
               ),
               Positioned(
                 right: 0,
@@ -185,9 +186,9 @@ class _FriendsScreenState extends State<FriendsScreen> {
                   width: 12,
                   height: 12,
                   decoration: BoxDecoration(
-                    color: f.online ? const Color(0xFF22C55E) : Colors.grey,
+                    color: f.online ? _online : c.textSecondary,
                     shape: BoxShape.circle,
-                    border: Border.all(color: _card, width: 2),
+                    border: Border.all(color: c.surface, width: 2),
                   ),
                 ),
               ),
@@ -199,23 +200,21 @@ class _FriendsScreenState extends State<FriendsScreen> {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(f.username,
-                    style: const TextStyle(
-                        color: Colors.white,
+                    style: TextStyle(
+                        color: c.textPrimary,
                         fontSize: 15,
                         fontWeight: FontWeight.w600)),
                 const SizedBox(height: 2),
                 Text(f.online ? 'Online' : 'Offline',
                     style: TextStyle(
-                        color: f.online
-                            ? const Color(0xFF22C55E)
-                            : Colors.grey,
+                        color: f.online ? _online : c.textSecondary,
                         fontSize: 12)),
               ],
             ),
           ),
           Text(f.score > 0 ? '${f.score} pts' : 'New',
-              style: const TextStyle(
-                  color: Color(0xFFF59E0B),
+              style: TextStyle(
+                  color: c.accent,
                   fontWeight: FontWeight.bold,
                   fontSize: 13)),
         ],

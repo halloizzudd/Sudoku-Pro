@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import '../../../models/leaderboard_entry.dart';
+import '../../../theme/app_colors.dart';
 
 // UC-15 Step 4: list rank 4 ke bawah dengan rank, avatar, username, tag, waktu.
 class LeaderboardList extends StatelessWidget {
@@ -20,6 +21,7 @@ class LeaderboardList extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final c = context.colors;
     return NotificationListener<ScrollNotification>(
       onNotification: (n) {
         if (n.metrics.pixels >= n.metrics.maxScrollExtent - 80) {
@@ -36,7 +38,7 @@ class LeaderboardList extends StatelessWidget {
           return Container(
             padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
             decoration: BoxDecoration(
-              color: const Color(0xFF1E1E2E),
+              color: c.surface,
               borderRadius: BorderRadius.circular(12),
             ),
             child: Row(
@@ -45,14 +47,14 @@ class LeaderboardList extends StatelessWidget {
                   width: 24,
                   child: Text(
                     '${e.rank}',
-                    style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
+                    style: TextStyle(color: c.textPrimary, fontWeight: FontWeight.bold),
                   ),
                 ),
                 const SizedBox(width: 8),
-                const CircleAvatar(
+                CircleAvatar(
                   radius: 16,
-                  backgroundColor: Color(0xFF2A2A4A),
-                  child: Icon(Icons.person, color: Colors.white, size: 16),
+                  backgroundColor: c.surface2,
+                  child: Icon(Icons.person, color: c.textPrimary, size: 16),
                 ),
                 const SizedBox(width: 12),
                 Expanded(
@@ -62,8 +64,8 @@ class LeaderboardList extends StatelessWidget {
                         child: Text(
                           e.username,
                           overflow: TextOverflow.ellipsis,
-                          style: const TextStyle(
-                              color: Colors.white, fontWeight: FontWeight.bold, fontSize: 14),
+                          style: TextStyle(
+                              color: c.textPrimary, fontWeight: FontWeight.bold, fontSize: 14),
                         ),
                       ),
                       if (e.isPro) ...[
@@ -71,11 +73,11 @@ class LeaderboardList extends StatelessWidget {
                         Container(
                           padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
                           decoration: BoxDecoration(
-                            color: const Color(0xFF5C4EE5).withOpacity(0.25),
+                            color: c.primary.withOpacity(0.25),
                             borderRadius: BorderRadius.circular(4),
                           ),
-                          child: const Text('PRO',
-                              style: TextStyle(color: Color(0xFFB0A6FF), fontSize: 9, fontWeight: FontWeight.bold)),
+                          child: Text('PRO',
+                              style: TextStyle(color: c.primary, fontSize: 9, fontWeight: FontWeight.bold)),
                         ),
                       ],
                     ],
@@ -83,7 +85,7 @@ class LeaderboardList extends StatelessWidget {
                 ),
                 Text(
                   _fmt(e.timeSeconds),
-                  style: const TextStyle(color: Colors.grey, fontWeight: FontWeight.bold),
+                  style: TextStyle(color: c.textSecondary, fontWeight: FontWeight.bold),
                 ),
               ],
             ),

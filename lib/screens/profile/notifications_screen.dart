@@ -2,27 +2,25 @@ import 'package:flutter/material.dart';
 import '../../models/app_settings.dart';
 import '../../services/settings_service.dart';
 import '../../services/l10n.dart';
+import '../../theme/app_colors.dart';
 
 // UC-23: Notifications — toggle Daily Reminder, Streak Alert, Leaderboard
 // Update. Simpan ke preferences (TODO: PATCH /users/me/preferences).
 class NotificationsScreen extends StatelessWidget {
   const NotificationsScreen({super.key});
 
-  static const Color _bg = Color(0xFF0F0F1A);
-  static const Color _card = Color(0xFF1A1A2E);
-  static const Color _indigo = Color(0xFF5C4EE5);
-
   @override
   Widget build(BuildContext context) {
+    final c = context.colors;
     return Scaffold(
-      backgroundColor: _bg,
+      backgroundColor: c.background,
       appBar: AppBar(
-        backgroundColor: _bg,
+        backgroundColor: c.background,
         elevation: 0,
-        iconTheme: const IconThemeData(color: Colors.white),
+        iconTheme: IconThemeData(color: c.textPrimary),
         title: Text(L10n.t('notifications'),
-            style: const TextStyle(
-                color: Colors.white,
+            style: TextStyle(
+                color: c.textPrimary,
                 fontWeight: FontWeight.bold,
                 letterSpacing: 1.2)),
       ),
@@ -34,28 +32,31 @@ class NotificationsScreen extends StatelessWidget {
             children: [
               Container(
                 decoration: BoxDecoration(
-                  color: _card,
+                  color: c.surface,
                   borderRadius: BorderRadius.circular(14),
                 ),
                 child: Column(
                   children: [
                     _toggle(
+                      c,
                       title: L10n.t('dailyReminder'),
                       subtitle: L10n.t('dailyReminderDesc'),
                       value: settings.dailyReminder,
                       onChanged: (v) => SettingsService.updateSettings(
                           settings.copyWith(dailyReminder: v)),
                     ),
-                    _sep(),
+                    _sep(c),
                     _toggle(
+                      c,
                       title: L10n.t('streakAlert'),
                       subtitle: L10n.t('streakAlertDesc'),
                       value: settings.streakAlert,
                       onChanged: (v) => SettingsService.updateSettings(
                           settings.copyWith(streakAlert: v)),
                     ),
-                    _sep(),
+                    _sep(c),
                     _toggle(
+                      c,
                       title: L10n.t('leaderboardUpdate'),
                       subtitle: L10n.t('leaderboardUpdateDesc'),
                       value: settings.leaderboardUpdate,
@@ -72,7 +73,8 @@ class NotificationsScreen extends StatelessWidget {
     );
   }
 
-  Widget _toggle({
+  Widget _toggle(
+    AppColors c, {
     required String title,
     required String subtitle,
     required bool value,
@@ -82,21 +84,21 @@ class NotificationsScreen extends StatelessWidget {
       contentPadding:
           const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
       title: Text(title,
-          style: const TextStyle(
-              color: Colors.white,
+          style: TextStyle(
+              color: c.textPrimary,
               fontSize: 15,
               fontWeight: FontWeight.w500)),
       subtitle: Text(subtitle,
-          style: const TextStyle(color: Colors.grey, fontSize: 12)),
+          style: TextStyle(color: c.textSecondary, fontSize: 12)),
       value: value,
       activeColor: Colors.white,
-      activeTrackColor: _indigo,
-      inactiveThumbColor: Colors.grey,
-      inactiveTrackColor: const Color(0xFF2A2A40),
+      activeTrackColor: c.primary,
+      inactiveThumbColor: c.textSecondary,
+      inactiveTrackColor: c.surface2,
       onChanged: onChanged,
     );
   }
 
-  Widget _sep() =>
-      const Divider(height: 1, thickness: 1, color: Color(0xFF26263C));
+  Widget _sep(AppColors c) =>
+      Divider(height: 1, thickness: 1, color: c.divider);
 }
